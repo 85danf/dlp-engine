@@ -1,0 +1,11 @@
+engine:
+  limit:
+    max-input-length: 4000
+
+# Allow capping Tomcat's request threads so they can be bound to the machine cpu
+# The reason for this is that regex matching is a pure-cpu operation and if we allow too many threads
+# they will start context-switching each other which will have an adverse effect on throughput
+server:
+  tomcat:
+    threads:
+      max: 16 # Default is under the assumption of a modern-day mac with 8 cores (16 hyper threads)

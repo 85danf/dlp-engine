@@ -1,0 +1,9 @@
+{
+  "properties": [
+    {
+      "name": "engine.limit.max-input-length",
+      "type": "java.lang.Integer",
+      "description": "Max input length allowed to be passed to the dlp engine.",
+      "defaultValue": 4000
+    }
+  ] }
