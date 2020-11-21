@@ -14,27 +14,33 @@ the probability of the match with regards to the surrounding context in the inpu
 ---
 
 ### API
-- This service answers on a single endpoint: `POST api/v1/scan` and expects a request json structured like:
-```
-{
-  "text": "...."
-  "filePath": "..."
-}
-```
-- Either `text` or `filePath` may be sent, but not both (and both cannot be empty at the same time).
-- When Passing a file via `filePath` the absolute path must point to a file that's readable by the executable 
+- This service answers on two endpoints:
+  - `POST api/v1/scan/text` expects a request json structured like:
+    ```
+    {
+      "text": "...."
+    }
+    ```
+  - `POST api/v1/scan/file` expects a request json structured like:
+    ```
+    {
+      "filePath": "...."
+    }
+    ```
+    - When Passing a file via `filePath` the absolute path must point to a file that's readable by the executable 
 
 - The response is structured as:
-```
-[
-    {
-        "type": "..",
-        "count": 0,
-        "contextRank": 0,
-    },
-    ....
-]
-```
+    ```
+    [
+        {
+            "type": "..",
+            "count": 0,
+            "contextRank": 0,
+        },
+        ....
+    ]
+    ```
+
 - Each object in the response shows one kind of sensitive data matched in the input (if any) and the count of matches found. In addition the context rank (explained above) is returned as well.
 - REST API documentation is also available via the service's Swagger endpoint available at: `http://localhost:8080/swagger-ui.html`
 

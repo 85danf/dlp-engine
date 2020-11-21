@@ -35,7 +35,8 @@ class DlpEngineApplicationTests {
 
     private final ObjectMapper mapper = new ObjectMapper();
 
-    private static final String SCAN_ENDPOINT = "/api/v1/scan";
+    private static final String SCAN_TEXT_ENDPOINT = "/api/v1/scan/text";
+    private static final String SCAN_FILE_ENDPOINT = "/api/v1/scan/file";
     private final ScanResults EMPTY_SCAN_RESULTS = ScanResults.builder().results(List.of(EMPTY_SCAN_RESULT)).build();
     private final ScanResults ERROR_SCAN_RESULTS = ScanResults.builder().errors(Map.of("Some Scanner", "Some Error")).build();
     private String EMPTY_SCAN_RESULTS_JSON;
@@ -52,8 +53,8 @@ class DlpEngineApplicationTests {
     }
 
     @Test
-    void testScanEndpoint() throws Exception {
-        var request = makeRequest(ScanRequest.builder().text("some text").build());
+    void testScanTextEndpoint() throws Exception {
+        var request = makeRequest(SCAN_TEXT_ENDPOINT, ScanRequest.builder().text("some text").build());
         when(service.scan(Mockito.anyString())).thenReturn(EMPTY_SCAN_RESULTS);
         mockMvc.perform(request)
                 .andDo(print())
@@ -64,7 +65,7 @@ class DlpEngineApplicationTests {
     @Test
     void testScanFileEndpoint() throws Exception {
         var filePath = getClass().getResource("/text_with_iban.txt").getPath();
-        var request = makeRequest(ScanRequest.builder().filePath(filePath).build());
+        var request = makeRequest(SCAN_FILE_ENDPOINT, ScanRequest.builder().filePath(filePath).build());
         when(service.scanFile(anyString())).thenReturn(EMPTY_SCAN_RESULTS);
         mockMvc.perform(request)
                 .andDo(print())
@@ -74,27 +75,22 @@ class DlpEngineApplicationTests {
 
     @Test
     public void testRestEndpointEmptyRequestValidation() throws Exception {
-        var badEmptyRequest = makeRequest(ScanRequest.builder().build());
+        var badEmptyRequest = makeRequest(SCAN_TEXT_ENDPOINT, ScanRequest.builder().build());
         mockMvc.perform(badEmptyRequest)
                 .andDo(print())
                 .andExpect(status().isBadRequest())
-                .andExpect(
-                        result -> assertThat(result.getResponse().getErrorMessage()).contains("Either the 'text' or the 'filePath' field must be specified."));
-    }
+                .andExpect(result -> assertThat(result.getResponse().getErrorMessage()).contains("The 'text' field must be specified."));
 
-    @Test
-    public void testRestEndpointBothFieldsRequestValidation() throws Exception {
-        var badFullRequest = makeRequest(ScanRequest.builder().filePath("oopsy").text("ohboy").build());
-        mockMvc.perform(badFullRequest)
+        badEmptyRequest = makeRequest(SCAN_FILE_ENDPOINT, ScanRequest.builder().build());
+        mockMvc.perform(badEmptyRequest)
                 .andDo(print())
                 .andExpect(status().isBadRequest())
-                .andExpect(result -> assertThat(result.getResponse().getErrorMessage())
-                        .contains("Either the 'text' or the 'filePath' field can be specified, but not both."));
+                .andExpect(result -> assertThat(result.getResponse().getErrorMessage()).contains("The 'filePath' field must be specified."));
     }
 
     @Test
     public void testRestEndpointRequestSizeValidation() throws Exception {
-        var badLengthRequest = makeRequest(ScanRequest.builder().text(RandomString.make(4050)).build());
+        var badLengthRequest = makeRequest(SCAN_TEXT_ENDPOINT, ScanRequest.builder().text(RandomString.make(4050)).build());
         mockMvc.perform(badLengthRequest)
                 .andDo(print())
                 .andExpect(status().isBadRequest())
@@ -103,7 +99,7 @@ class DlpEngineApplicationTests {
 
     @Test
     public void testRestEndpointFileValidation() throws Exception {
-        var badLengthRequest = makeRequest(ScanRequest.builder().filePath("nope-nope-nope").build());
+        var badLengthRequest = makeRequest(SCAN_FILE_ENDPOINT, ScanRequest.builder().filePath("nope-nope-nope").build());
         mockMvc.perform(badLengthRequest)
                 .andDo(print())
                 .andExpect(status().isNotFound())
@@ -113,7 +109,7 @@ class DlpEngineApplicationTests {
     @Test
     public void testErrorsResponse() throws Exception {
         var errorResponse = mapper.writeValueAsString(ERROR_SCAN_RESULTS);
-        var request = makeRequest(ScanRequest.builder().text("some text").build());
+        var request = makeRequest(SCAN_TEXT_ENDPOINT, ScanRequest.builder().text("some text").build());
         when(service.scan(Mockito.anyString())).thenReturn(ERROR_SCAN_RESULTS);
         mockMvc.perform(request)
                 .andDo(print())
@@ -122,8 +118,8 @@ class DlpEngineApplicationTests {
     }
 
 
-    private MockHttpServletRequestBuilder makeRequest(ScanRequest request) throws JsonProcessingException {
-        return post(SCAN_ENDPOINT)
+    private MockHttpServletRequestBuilder makeRequest(String endpoint, ScanRequest request) throws JsonProcessingException {
+        return post(endpoint)
                 .contentType(APPLICATION_JSON_VALUE)
                 .accept(APPLICATION_JSON_VALUE)
                 .content(mapper.writeValueAsString(request));
