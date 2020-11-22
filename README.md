@@ -58,11 +58,11 @@ the probability of the match with regards to the surrounding context in the inpu
 `docker run -d --rm --name dlpengine -v /local_path/to/some/dir/with/files:/tmp/workdir -p 8080:8080 feldan/dlpengine:0.9`
 
 ##### Using httpie:
-- `http POST http://localhost:8080/api/v1/scan text="social security 123-45-6789"`
-- `http POST http://localhost:8080/api/v1/scan filePath="/path/to/my/file`
+- `http POST http://localhost:8080/api/v1/scan/text text="social security 123-45-6789"`
+- `http POST http://localhost:8080/api/v1/scan/file filePath="/path/to/my/file`
 ##### Using curl:
-- `curl -XPOST localhost:8080/api/v1/scan -H "Content-Type: application/json" -d '{"text":"social security 123-45-6789"}'`
-- `curl -XPOST localhost:8080/api/v1/scan -H "Content-Type: application/json" -d '{"filePath":"/path/to/my/file"}'`
+- `curl -XPOST localhost:8080/api/v1/scan/text -H "Content-Type: application/json" -d '{"text":"social security 123-45-6789"}'`
+- `curl -XPOST localhost:8080/api/v1/scan/file -H "Content-Type: application/json" -d '{"filePath":"/path/to/my/file"}'`
 
 ---
 
